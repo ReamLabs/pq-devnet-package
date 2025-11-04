@@ -1,0 +1,5 @@
+name: github.com/ReamLabs/pq-devnet-package
+description: |-
+  # github.com/ReamLabs/pq-devnet-package
+  Running a local PQ devnet for lean Ethereum development.
+replace: {}
