@@ -1,0 +1,12 @@
+participants:
+  - type: ream
+    image: ethpandaops/ream:master-0bceaee
+    count: 4
+network_params:
+  num_validator_keys_per_node: 1
+  genesis_delay: 60
+  genesis_time: 0
+additional_services:
+  - grafana
+  - leanview
+  - prometheus
