@@ -24,5 +24,9 @@ def run(plan, args = {}):
     plan.print("Running pq-devnet-package with {} participants".format(num_participants))
 
     # Generate N node keys for each participant (32-byte random hex strings)
-    node_keys = p2p_key_generator.generate_node_keys(plan, num_participants)
-    plan.print("Generated {} node keys".format(len(node_keys)))
+    keys_result = p2p_key_generator.generate_node_keys(plan, num_participants)
+    plan.print("Generated {} node keys".format(len(keys_result.keys)))
+
+    # Print the keys and their artifact locations
+    for i, key in enumerate(keys_result.keys):
+        plan.print("Node {}: {} (artifact: {})".format(i, key, keys_result.artifacts[i]))
