@@ -2,8 +2,53 @@
 Genesis generator module using pk910's tool.
 """
 
-def run_genesis_generator(plan):
-    # TODO
+GENESIS_GENERATOR_IMAGE = "ethpandaops/eth-beacon-genesis:pk910-leanchain"
+GENESIS_GENERATOR_SERVICE_NAME = "genesis-generator"
+GENESIS_DIR = "/genesis"
+
+def run_genesis_generator(plan, validator_config_artifact):
+    """
+    Runs eth-beacon-genesis leanchain to generate genesis files.
+
+    Args:
+        plan: The plan object to execute actions.
+        validator_config_artifact: The artifact name containing validator-config.yaml
+
+    Returns:
+        A list of artifact names containing the generated genesis files.
+    """
+
+    network_config_artifact = create_network_config(plan)
+
+    result = plan.run_sh(
+        run = (
+            "mkdir -p {0} && " +
+            "/app/eth-genesis-state-generator leanchain " +
+            "--config /network-config/config.yaml " +
+            "--mass-validators {0}/validator-config.yaml " +
+            "--state-output {0}/genesis.ssz " +
+            "--json-output {0}/genesis.json " +
+            "--nodes-output {0}/nodes.yaml " +
+            "--validators-output {0}/validators.yaml " +
+            "--config-output {0}/config.yaml"
+        ).format(GENESIS_DIR),
+        image = GENESIS_GENERATOR_IMAGE,
+        files = {
+            "/genesis": validator_config_artifact,
+            "/network-config": network_config_artifact,
+        },
+        store = [
+            StoreSpec(src = GENESIS_DIR + "/genesis.ssz", name = "genesis-ssz"),
+            StoreSpec(src = GENESIS_DIR + "/genesis.json", name = "genesis-json"),
+            StoreSpec(src = GENESIS_DIR + "/nodes.yaml", name = "nodes-yaml"),
+            StoreSpec(src = GENESIS_DIR + "/validators.yaml", name = "validators-yaml"),
+            StoreSpec(src = GENESIS_DIR + "/config.yaml", name = "network-config"),
+        ],
+        description = "Running eth-beacon-genesis leanchain to generate genesis files",
+    )
+    plan.verify(result.code, "==", 0)
+
+    return result.files_artifacts
 
 def create_network_config(plan):
     """
@@ -21,7 +66,7 @@ def create_network_config(plan):
 
     artifact_name = plan.render_templates(
         config = {
-            "/genesis/config.yaml": struct(
+            "config.yaml": struct(
                 template = """# Genesis Settings
 GENESIS_TIME: {{.GenesisTime}}
 

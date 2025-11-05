@@ -4,6 +4,8 @@ Module for pq-devnet-package: provides the run(plan, args) entrypoint.
 
 clients_launcher = import_module("./src/clients/launcher.star")
 input_parser = import_module("./src/utils/input_parser.star")
+
+genesis_generator = import_module("./src/setup/genesis_generator.star")
 p2p_key_generator = import_module("./src/setup/p2p_key_generator.star")
 validator_config_generator = import_module("./src/setup/validator_config_generator.star")
 
@@ -47,12 +49,7 @@ def run(plan, args = {}):
     )
     plan.print("Generated validator-config.yaml (artifact: {})".format(validator_config_artifact))
 
-    # Cat the validator-config.yaml for visibility
-    cat_result = plan.run_sh(
-        run = "cat /mounted/genesis/validator-config.yaml",
-        files = {
-            "/mounted": validator_config_artifact,
-        },
-        description = "Displaying generated validator-config.yaml",
-    )
-    plan.verify(cat_result.code, "==", 0)
+    # Generate genesis artifacts
+    all_artifacts = genesis_generator.run_genesis_generator(plan, validator_config_artifact)
+    for artifact in all_artifacts:
+        plan.print("Generated genesis artifact: {}".format(artifact))

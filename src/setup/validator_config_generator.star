@@ -40,7 +40,7 @@ def generate_validator_config(plan, services, node_keys):
     # Render the template
     artifact_name = plan.render_templates(
         config = {
-            "/genesis/validator-config.yaml": struct(
+            "validator-config.yaml": struct(
                 template = """shuffle: {{.Shuffle}}
 validators:
 {{- range .Validators}}
