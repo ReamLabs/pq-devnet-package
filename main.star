@@ -35,21 +35,27 @@ def run(plan, args = {}):
     for i, key in enumerate(keys_result.keys):
         plan.print("Node {}: {} (artifact: {})".format(i, key, keys_result.artifacts[i]))
 
+    # Warm up network config artifact
+    genesis_generator.warm_artifacts(plan)
+
     # Prelaunch clients and get their services
-    services = clients_launcher.prelaunch(plan, args_with_right_defaults["participants"])
-    plan.print("Pre-launched {} client services".format(len(services)))
-    for service in services:
-        plan.print("Service details: {}".format(service))
+    # Pass the genesis artifact names so they can be mounted (as future references)
+    services = clients_launcher.prelaunch(
+        plan,
+        args_with_right_defaults["participants"],
+        keys_result.artifacts,
+        genesis_generator.GENESIS_ARTIFACTS,
+    )
 
     # Generate validator-config.yaml
-    validator_config_artifact = validator_config_generator.generate_validator_config(
+    validator_config_generator.generate_validator_config(
         plan,
         services,
         keys_result.keys,
     )
-    plan.print("Generated validator-config.yaml (artifact: {})".format(validator_config_artifact))
 
-    # Generate genesis artifacts
-    all_artifacts = genesis_generator.run_genesis_generator(plan, validator_config_artifact)
-    for artifact in all_artifacts:
-        plan.print("Generated genesis artifact: {}".format(artifact))
+    # Run the genesis generator to produce genesis artifacts
+    genesis_generator.run_genesis_generator(plan)
+
+    # Run the clients with the generated genesis artifacts
+    clients_launcher.launch(plan, services)

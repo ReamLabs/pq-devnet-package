@@ -3,6 +3,8 @@ Validator Config Generator Module
 Generates validator-config.yaml for the network participants.
 """
 
+genesis_generator = import_module("./genesis_generator.star")
+
 QUIC_PORT = 9000
 
 def generate_validator_config(plan, services, node_keys):
@@ -55,7 +57,7 @@ validators:
                 data = template_data,
             ),
         },
-        name = "validator-config",
+        name = genesis_generator.GENESIS_ARTIFACTS.validator_config,
         description = "Generating validator-config.yaml with {} validators".format(len(node_keys)),
     )
 
