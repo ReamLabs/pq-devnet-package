@@ -2,6 +2,7 @@
 Module for pq-devnet-package: provides the run(plan, args) entrypoint.
 """
 
+clients_launcher = import_module("./src/clients/launcher.star")
 input_parser = import_module("./src/utils/input_parser.star")
 p2p_key_generator = import_module("./src/p2p_key_generator/p2p_key_generator.star")
 validator_config_generator = import_module("./src/validator_config/validator_config_generator.star")
@@ -31,6 +32,12 @@ def run(plan, args = {}):
     # Print the keys and their artifact locations
     for i, key in enumerate(keys_result.keys):
         plan.print("Node {}: {} (artifact: {})".format(i, key, keys_result.artifacts[i]))
+
+    # Prelaunch clients and get their services
+    services = clients_launcher.prelaunch(plan, args_with_right_defaults["participants"])
+    plan.print("Pre-launched {} client services".format(len(services)))
+    for service in services:
+        plan.print("Service details: {}".format(service))
 
     # Generate validator-config.yaml
     validator_config_artifact = validator_config_generator.generate_validator_config(
