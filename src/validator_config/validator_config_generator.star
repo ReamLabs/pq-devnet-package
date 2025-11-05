@@ -3,13 +3,15 @@ Validator Config Generator Module
 Generates validator-config.yaml for the network participants.
 """
 
-def generate_validator_config(plan, participants, node_keys):
+QUIC_PORT = 9000
+
+def generate_validator_config(plan, services, node_keys):
     """
     Generates a validator-config.yaml file based on participants and their node keys.
 
     Args:
         plan: The plan object to execute actions.
-        participants: List of participant configurations from args
+        services: List of participant instances.
         node_keys: List of generated private keys (32-byte hex strings)
 
     Returns:
@@ -18,24 +20,16 @@ def generate_validator_config(plan, participants, node_keys):
 
     # Build the validator entries as structured data
     validators_list = []
-    key_index = 0
 
-    for participant in participants:
-        participant_name = participant.get("type", "unknown_client")
-        participant_count = participant.get("count", 1)
-
-        for _ in range(participant_count):
-            validator_entry = {
-                "name": "{}_{}".format(participant_name, key_index),
-                "privkey": node_keys[key_index].strip(),
-                "ip": "${KURTOSIS_IP_ADDR_PLACEHOLDER}",
-                "quic": 9000 + key_index,
-                "seq": 1,
-                "count": 1,
-            }
-
-            validators_list.append(validator_entry)
-            key_index += 1
+    for i, service in enumerate(services):
+        validators_list.append({
+            "name": service.name,
+            "privkey": node_keys[i].strip(),
+            "ip": service.ip_address,
+            "quic": QUIC_PORT,
+            "seq": 1,
+            "count": 1,
+        })
 
     # Create the template data
     template_data = {

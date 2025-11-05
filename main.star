@@ -42,7 +42,7 @@ def run(plan, args = {}):
     # Generate validator-config.yaml
     validator_config_artifact = validator_config_generator.generate_validator_config(
         plan,
-        args_with_right_defaults["participants"],
+        services,
         keys_result.keys,
     )
     plan.print("Generated validator-config.yaml (artifact: {})".format(validator_config_artifact))
@@ -56,4 +56,3 @@ def run(plan, args = {}):
         description = "Displaying generated validator-config.yaml",
     )
     plan.verify(cat_result.code, "==", 0)
-    plan.print("Generated validator-config.yaml content:\n{}".format(cat_result.output))
