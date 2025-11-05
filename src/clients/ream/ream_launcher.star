@@ -11,7 +11,7 @@ QUIC_PORT = 9000
 HTTP_PORT = 5052
 METRICS_PORT = 8080
 
-def initialize(plan, image, index, key_artifact, genesis_artifacts):
+def initialize(plan, image, index, key_artifact):
     """
     Initialize a Ream client with given image and index.
 
@@ -20,7 +20,6 @@ def initialize(plan, image, index, key_artifact, genesis_artifacts):
         image: The Docker image to use for the client.
         index: The index of the participant.
         key_artifact: The name of the files artifact containing the node key.
-        genesis_artifacts: A struct containing the genesis artifact names (will be created later).
 
     Returns:
         The launched service.
@@ -47,20 +46,11 @@ def initialize(plan, image, index, key_artifact, genesis_artifacts):
         # },
         files = {
             "/config/keys": key_artifact,
-            "/genesis": Directory(
-                artifact_names = [
-                    genesis_artifacts.network_config,
-                    genesis_artifacts.validators_yaml,
-                    genesis_artifacts.nodes_yaml,
-                    genesis_artifacts.genesis_ssz,
-                    genesis_artifacts.genesis_json,
-                ],
-            ),
         },
     )
     return plan.add_service(service_name, config)
 
-def start(plan, service, node_index):
+def start(plan, service, node_index, artifacts_content):
     """
     Start the Ream client service with the provided genesis artifacts.
 
@@ -68,7 +58,28 @@ def start(plan, service, node_index):
         plan: The plan object to execute actions.
         service: The service object to start.
         node_index: The index of this node.
+        artifacts_content: A struct containing the genesis artifact contents.
     """
+
+    common.create_root_genesis_dir(plan, service)
+    common.copy_genesis_content(
+        plan,
+        service,
+        artifacts_content.nodes_yaml,
+        "/genesis/nodes.yaml",
+    )
+    common.copy_genesis_content(
+        plan,
+        service,
+        artifacts_content.validators_yaml,
+        "/genesis/validators.yaml",
+    )
+    common.copy_genesis_content(
+        plan,
+        service,
+        artifacts_content.config_yaml,
+        "/genesis/config.yaml",
+    )
 
     # Construct the full command as a single string
     cmd_parts = [
@@ -93,7 +104,7 @@ def start(plan, service, node_index):
     plan.exec(
         service_name = service.name,
         recipe = ExecRecipe(
-            command = ["/bin/sh", "-c", "nohup " + ENTRYPOINT + " " + full_cmd + " >/dev/null 2>&1 &"],
+            command = ["/bin/sh", "-c", "nohup " + ENTRYPOINT + " " + full_cmd + " >> /var/log/" + service.name + ".log 2>&1 &"],
         ),
-        description = "Starting {} with genesis files".format(service.name),
+        description = "Starting {}".format(service.name),
     )

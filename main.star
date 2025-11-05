@@ -29,14 +29,6 @@ def run(plan, args = {}):
 
     # Generate N node keys for each participant (32-byte random hex strings)
     keys_result = p2p_key_generator.generate_node_keys(plan, num_participants)
-    plan.print("Generated {} node keys".format(len(keys_result.keys)))
-
-    # Print the keys and their artifact locations
-    for i, key in enumerate(keys_result.keys):
-        plan.print("Node {}: {} (artifact: {})".format(i, key, keys_result.artifacts[i]))
-
-    # Warm up network config artifact
-    genesis_generator.warm_artifacts(plan)
 
     # Prelaunch clients and get their services
     # Pass the genesis artifact names so they can be mounted (as future references)
@@ -44,7 +36,6 @@ def run(plan, args = {}):
         plan,
         args_with_right_defaults["participants"],
         keys_result.artifacts,
-        genesis_generator.GENESIS_ARTIFACTS,
     )
 
     # Generate validator-config.yaml
@@ -58,4 +49,4 @@ def run(plan, args = {}):
     genesis_generator.run_genesis_generator(plan)
 
     # Run the clients with the generated genesis artifacts
-    clients_launcher.launch(plan, services)
+    clients_launcher.launch(plan, services, genesis_generator.GENESIS_ARTIFACTS)

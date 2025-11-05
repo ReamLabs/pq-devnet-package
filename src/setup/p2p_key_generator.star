@@ -38,7 +38,6 @@ def generate_node_keys(plan, num_participants):
             description = "Generating and storing node key {}".format(i),
         )
 
-        plan.verify(result.code, "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
         node_key = result.output.strip()
         node_keys.append(node_key)
         artifacts.append(result.files_artifacts[0])

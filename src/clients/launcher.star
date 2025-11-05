@@ -4,7 +4,7 @@ Module for launching the PQ devnet.
 
 ream_launcher = import_module("./ream/ream_launcher.star")
 
-def prelaunch(plan, participants, keys_artifacts, genesis_artifacts):
+def prelaunch(plan, participants, keys_artifacts):
     """
     Prelaunch setup for pq-devnet-package.
 
@@ -12,7 +12,6 @@ def prelaunch(plan, participants, keys_artifacts, genesis_artifacts):
         plan: The plan object to execute actions.
         participants: A list of participant configurations.
         keys_artifacts: A list of key artifact names (one per node).
-        genesis_artifacts: A struct containing genesis artifact names.
 
     Returns:
         A list of launched services.
@@ -36,7 +35,6 @@ def prelaunch(plan, participants, keys_artifacts, genesis_artifacts):
                 client_image,
                 node_index,
                 keys_artifacts[node_index],
-                genesis_artifacts,
             )
             services.append(service)
             node_index += 1
@@ -47,15 +45,44 @@ def prelaunch(plan, participants, keys_artifacts, genesis_artifacts):
 
     return services
 
-def launch(plan, services):
+def launch(plan, services, genesis_artifacts):
     """
     Launch the pq-devnet-package clients with actual commands.
 
     Args:
         plan: The plan object to execute actions.
         services: A list of launched services.
+        genesis_artifacts: A struct containing genesis artifact names.
     """
+
+    # Read nodes.yaml from artifacts and copy to /genesis/nodes.yaml
+    nodes_yaml_result = plan.run_sh(
+        run = "cat /genesis/nodes.yaml",
+        files = {
+            "/genesis": genesis_artifacts.nodes_yaml,
+        },
+        description = "Reading nodes.yaml from genesis artifacts",
+    )
+    validators_yaml_result = plan.run_sh(
+        run = "cat /genesis/validators.yaml",
+        files = {
+            "/genesis": genesis_artifacts.validators_yaml,
+        },
+        description = "Reading validators.yaml from genesis artifacts",
+    )
+    config_yaml_result = plan.run_sh(
+        run = "cat /genesis/config.yaml",
+        files = {
+            "/genesis": genesis_artifacts.network_config,
+        },
+        description = "Reading config.yaml from genesis artifacts",
+    )
+    artifacts_content = struct(
+        nodes_yaml = nodes_yaml_result.output,
+        validators_yaml = validators_yaml_result.output,
+        config_yaml = config_yaml_result.output,
+    )
 
     for i, service in enumerate(services):
         # TODO: Support other client types
-        ream_launcher.start(plan, service, i)
+        ream_launcher.start(plan, service, i, artifacts_content)
