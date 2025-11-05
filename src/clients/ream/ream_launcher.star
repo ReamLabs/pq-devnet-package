@@ -30,20 +30,23 @@ def initialize(plan, image, index, key_artifact):
         image = image,
         entrypoint = ["/bin/sh", "-c"],
         cmd = common.DUMMY_CMD,
-        # ports = {
-        #     "quic": PortSpec(
-        #         number = QUIC_PORT,
-        #         transport_protocol = "UDP",
-        #     ),
-        #     "http": PortSpec(
-        #         number = HTTP_PORT,
-        #         transport_protocol = "TCP",
-        #     ),
-        #     "metrics": PortSpec(
-        #         number = METRICS_PORT,
-        #         transport_protocol = "TCP",
-        #     ),
-        # },
+        ports = {
+            "quic": PortSpec(
+                number = QUIC_PORT,
+                transport_protocol = "UDP",
+                wait = None,
+            ),
+            "http": PortSpec(
+                number = HTTP_PORT,
+                transport_protocol = "TCP",
+                wait = None,
+            ),
+            "metrics": PortSpec(
+                number = METRICS_PORT,
+                transport_protocol = "TCP",
+                wait = None,
+            ),
+        },
         files = {
             "/config/keys": key_artifact,
         },
