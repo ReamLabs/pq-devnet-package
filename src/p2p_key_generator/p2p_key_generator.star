@@ -25,7 +25,7 @@ def generate_node_keys(plan, num_participants):
     for i in range(num_participants):
         result = plan.run_sh(
             run = "mkdir -p /config/keys && \
-            openssl rand -hex 32 > /config/keys/node" +
+            openssl rand -hex 32 | tr -d '\\n' > /config/keys/node" +
                   str(i) + ".key && \
             cat /config/keys/node" + str(i) + ".key",
             image = OPENSSL_IMAGE,
