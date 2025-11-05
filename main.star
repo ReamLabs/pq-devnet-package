@@ -4,8 +4,8 @@ Module for pq-devnet-package: provides the run(plan, args) entrypoint.
 
 clients_launcher = import_module("./src/clients/launcher.star")
 input_parser = import_module("./src/utils/input_parser.star")
-p2p_key_generator = import_module("./src/p2p_key_generator/p2p_key_generator.star")
-validator_config_generator = import_module("./src/validator_config/validator_config_generator.star")
+p2p_key_generator = import_module("./src/setup/p2p_key_generator.star")
+validator_config_generator = import_module("./src/setup/validator_config_generator.star")
 
 def run(plan, args = {}):
     """
