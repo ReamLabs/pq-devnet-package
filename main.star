@@ -21,8 +21,11 @@ def run(plan, args = {}):
     # Parse input arguments and fill in defaults
     args_with_right_defaults = input_parser.input_parser(args)
 
+    participants = args_with_right_defaults["participants"]
+    network_params = args_with_right_defaults["network_params"]
+
     num_participants = 0
-    for participant in args_with_right_defaults["participants"]:
+    for participant in participants:
         num_participants += participant.get("count", 1)
 
     plan.print("Running pq-devnet-package with {} participants".format(num_participants))
@@ -46,7 +49,7 @@ def run(plan, args = {}):
     )
 
     # Run the genesis generator to produce genesis artifacts
-    genesis_generator.run_genesis_generator(plan)
+    genesis_generator.run_genesis_generator(plan, network_params)
 
     # Run the clients with the generated genesis artifacts
     clients_launcher.launch(plan, services, genesis_generator.GENESIS_ARTIFACTS)

@@ -14,18 +14,19 @@ GENESIS_GENERATOR_IMAGE = "ethpandaops/eth-beacon-genesis:pk910-leanchain"
 GENESIS_GENERATOR_SERVICE_NAME = "genesis-generator"
 GENESIS_DIR = "/genesis"
 
-def run_genesis_generator(plan):
+def run_genesis_generator(plan, network_params):
     """
     Runs eth-beacon-genesis leanchain to generate genesis files.
 
     Args:
         plan: The plan object to execute actions.
+        network_params: Parameters for the network configuration.
 
     Returns:
         A list of artifact names containing the generated genesis files.
     """
 
-    create_network_config(plan)
+    create_network_config(plan, network_params)
 
     plan.run_sh(
         run = (
@@ -63,7 +64,7 @@ def run_genesis_generator(plan):
         network_config = "network-config",
     )
 
-def create_network_config(plan):
+def create_network_config(plan, network_params):
     """
     Creates a config.yaml file.
 
@@ -74,8 +75,13 @@ def create_network_config(plan):
         The name of the files artifact containing config.yaml
     """
 
-    # Get genesis time dynamically
-    genesis_time = get_genesis_time(plan)
+    # If genesis_time is explicitly provided, use it
+    # Otherwise, use current time + padding
+    if network_params.get("genesis_time", 0) != 0:
+        genesis_time = int(network_params.get("genesis_time"))
+    else:
+        # Get genesis time dynamically
+        genesis_time = get_genesis_time(plan, padding = network_params.get("genesis_delay", 60))
 
     artifact_name = plan.render_templates(
         config = {
