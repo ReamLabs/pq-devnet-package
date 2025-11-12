@@ -5,6 +5,7 @@ Module for launching a Ream client.
 common = import_module("../common.star")
 
 BASE_SERVICE_NAME = "ream"
+DEFAULT_IMAGE = "ghcr.io/reamlabs/ream:latest"
 ENTRYPOINT = "/usr/local/bin/ream"
 
 QUIC_PORT = 9000
@@ -24,6 +25,9 @@ def initialize(plan, image, index, key_artifact):
     Returns:
         The launched service.
     """
+
+    if image == "":
+        image = DEFAULT_IMAGE
 
     service_name = BASE_SERVICE_NAME + "-{}".format(index)
     config = ServiceConfig(
