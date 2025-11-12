@@ -7,7 +7,7 @@ genesis_generator = import_module("./genesis_generator.star")
 
 QUIC_PORT = 9000
 
-def generate_validator_config(plan, services, node_keys):
+def generate_validator_config(plan, services, node_keys, num_validator_keys_per_node):
     """
     Generates a validator-config.yaml file based on participants and their node keys.
 
@@ -15,6 +15,7 @@ def generate_validator_config(plan, services, node_keys):
         plan: The plan object to execute actions.
         services: List of participant instances.
         node_keys: List of generated private keys (32-byte hex strings)
+        num_validator_keys_per_node: Number of validator keys to assign per node.
 
     Returns:
         The name of the files artifact containing validator-config.yaml
@@ -30,7 +31,7 @@ def generate_validator_config(plan, services, node_keys):
             "ip": service.ip_address,
             "quic": QUIC_PORT,
             "seq": 1,
-            "count": 1,
+            "count": num_validator_keys_per_node,
         })
 
     # Create the template data

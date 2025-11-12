@@ -46,6 +46,7 @@ def run(plan, args = {}):
         plan,
         services,
         keys_result.keys,
+        num_validator_keys_per_node = network_params.get("num_validator_keys_per_node", 1),
     )
 
     # Run the genesis generator to produce genesis artifacts
