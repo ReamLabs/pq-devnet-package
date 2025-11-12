@@ -2,8 +2,6 @@
 Common constants and utilities for clients.
 """
 
-DUMMY_CMD = ["sleep 99999"]
-
 def create_root_genesis_dir(plan, service):
     """
     Create the root genesis directory.
@@ -39,3 +37,17 @@ def copy_genesis_content(plan, service, content, target_path):
         ),
         description = "Copying genesis content to {}".format(target_path),
     )
+
+def get_log_file_path(service_name):
+    """
+    Returns the log file path for the given service.
+    """
+    return "/var/log/" + service_name + ".log"
+
+def get_tail_logs_cmd(service_name):
+    """
+    Returns the command to tail logs for the given service.
+    """
+
+    log_file = get_log_file_path(service_name)
+    return ["touch " + log_file + " && tail -f " + log_file]

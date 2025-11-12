@@ -29,7 +29,7 @@ def initialize(plan, image, index, key_artifact):
     config = ServiceConfig(
         image = image,
         entrypoint = ["/bin/sh", "-c"],
-        cmd = common.DUMMY_CMD,
+        cmd = common.get_tail_logs_cmd(service_name),
         ports = {
             "quic": PortSpec(
                 number = QUIC_PORT,
@@ -104,10 +104,11 @@ def start(plan, service, node_index, artifacts_content):
     ]
     full_cmd = " ".join(cmd_parts)
 
+    log_file = common.get_log_file_path(service.name)
     plan.exec(
         service_name = service.name,
         recipe = ExecRecipe(
-            command = ["/bin/sh", "-c", "nohup " + ENTRYPOINT + " " + full_cmd + " >> /var/log/" + service.name + ".log 2>&1 &"],
+            command = ["/bin/sh", "-c", "nohup " + ENTRYPOINT + " " + full_cmd + " >> " + log_file + " 2>&1 &"],
         ),
         description = "Starting {}".format(service.name),
     )
