@@ -8,10 +8,6 @@ BASE_SERVICE_NAME = "ream"
 DEFAULT_IMAGE = "ghcr.io/reamlabs/ream:latest"
 ENTRYPOINT = "/usr/local/bin/ream"
 
-QUIC_PORT = 9000
-HTTP_PORT = 5052
-METRICS_PORT = 8080
-
 def initialize(plan, image, index, key_artifact):
     """
     Initialize a Ream client with given image and index.
@@ -36,17 +32,17 @@ def initialize(plan, image, index, key_artifact):
         cmd = common.get_tail_logs_cmd(service_name),
         ports = {
             "quic": PortSpec(
-                number = QUIC_PORT,
+                number = common.QUIC_PORT,
                 transport_protocol = "UDP",
                 wait = None,
             ),
             "http": PortSpec(
-                number = HTTP_PORT,
+                number = common.HTTP_PORT,
                 transport_protocol = "TCP",
                 wait = None,
             ),
             "metrics": PortSpec(
-                number = METRICS_PORT,
+                number = common.METRICS_PORT,
                 transport_protocol = "TCP",
                 wait = None,
             ),
@@ -97,14 +93,14 @@ def start(plan, service, node_index, artifacts_content):
         "--node-id " + service.name,
         "--private-key-path /config/keys/node{}.key".format(node_index),
         "--socket-address " + service.ip_address,
-        "--socket-port " + str(QUIC_PORT),
+        "--socket-port " + str(common.QUIC_PORT),
         "--http-address 0.0.0.0",
-        "--http-port " + str(HTTP_PORT),
+        "--http-port " + str(common.HTTP_PORT),
         "--http-allow-origin",
         "--bootnodes /genesis/nodes.yaml",
         "--metrics",
         "--metrics-address 0.0.0.0",
-        "--metrics-port " + str(METRICS_PORT),
+        "--metrics-port " + str(common.METRICS_PORT),
     ]
     full_cmd = " ".join(cmd_parts)
 

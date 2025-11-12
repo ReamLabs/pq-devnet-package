@@ -2,6 +2,11 @@
 Common constants and utilities for clients.
 """
 
+# Port definitions
+QUIC_PORT = 9000
+HTTP_PORT = 5052
+METRICS_PORT = 8080
+
 def create_root_genesis_dir(plan, service):
     """
     Create the root genesis directory.

@@ -37,7 +37,7 @@ def run(plan, args = {}):
     # Pass the genesis artifact names so they can be mounted (as future references)
     services = clients_launcher.prelaunch(
         plan,
-        args_with_right_defaults["participants"],
+        participants,
         keys_result.artifacts,
     )
 
