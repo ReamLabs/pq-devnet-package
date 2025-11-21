@@ -3,6 +3,7 @@ Module for launching the PQ devnet.
 """
 
 ream_launcher = import_module("./ream/ream_launcher.star")
+zeam_launcher = import_module("./zeam/zeam_launcher.star")
 
 def prelaunch(plan, participants, keys_artifacts):
     """
@@ -24,13 +25,18 @@ def prelaunch(plan, participants, keys_artifacts):
         client_type = participant.get("type")
         client_image = participant.get("image", "")
         client_count = participant.get("count", 1)
-
-        # TODO: Support other client types
-        if client_type != "ream":
+        
+        # TODO: Add Qlean
+        if client_type == "ream":
+            launcher = ream_launcher
+        elif client_type == "zeam":
+            launcher = zeam_launcher
+        else:
+            plan.print("Unsupported client type: {}".format(client_type))
             continue
 
         for _ in range(client_count):
-            service = ream_launcher.initialize(
+            service = launcher.initialize(
                 plan,
                 client_image,
                 node_index,
@@ -77,12 +83,29 @@ def launch(plan, services, genesis_artifacts):
         },
         description = "Reading config.yaml from genesis artifacts",
     )
+    validator_config_yaml_result = plan.run_sh(
+        run = "cat /genesis/validator-config.yaml",
+        files = {
+            "/genesis": genesis_artifacts.validator_config,
+        },
+        description = "Reading validator-config.yaml from genesis artifacts",
+    )
     artifacts_content = struct(
         nodes_yaml = nodes_yaml_result.output,
         validators_yaml = validators_yaml_result.output,
         config_yaml = config_yaml_result.output,
+        validator_config_yaml = validator_config_yaml_result.output,
     )
 
     for i, service in enumerate(services):
-        # TODO: Support other client types
-        ream_launcher.start(plan, service, i, artifacts_content)
+        client_type = service.name.split("-")[0]
+
+        # TODO: Add Qlean
+        if client_type == "ream":
+            launcher = ream_launcher
+        elif client_type == "zeam":
+            launcher = zeam_launcher
+        else:
+            plan.print("Unsupported client type during launch: {}".format(client_type))
+            continue
+        launcher.start(plan, service, i, artifacts_content)
